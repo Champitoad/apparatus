@@ -37,6 +37,11 @@ R.create "Menubar",
       # R.MenubarItem {title: "Duplicate", isDisabled: !isSelection, fn: @_duplicateSelectedElement}
       R.MenubarItem {title: "Create Symbol", isDisabled: !isSelection, fn: @_createSymbolFromSelectedElement}
 
+      R.div {className: "MenubarSeparator"}
+      
+      R.MenubarItem {title: "Export Symbol", isDisabled: false, fn: @_exportCurrentSymbol}
+      R.MenubarItem {title: "Import Symbol", isDisabled: false, fn: @_importSymbol}
+
       if editor.experimental
         [
           R.div {key: 1, className: "MenubarSeparator"}
@@ -118,6 +123,14 @@ R.create "Menubar",
   _createSymbolFromSelectedElement: ->
     {project} = @context
     project.createSymbolFromSelectedElement()
+
+  _exportCurrentSymbol: ->
+    {editor} = @context
+    editor.exportCurrentSymbol()
+
+  _importSymbol: ->
+    {editor} = @context
+    editor.importSymbol()
 
 
 R.create "MenubarItem",

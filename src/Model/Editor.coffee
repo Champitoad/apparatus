@@ -187,6 +187,50 @@ module.exports = class Editor
 
 
   # ===========================================================================
+  # Symbol Export/Import
+  # ===========================================================================
+
+  # Exports the current symbol to a JSON file
+  exportCurrentSymbol: ->
+    {project} = this
+    currentElement = project.editingElement
+    
+    # Only allow exporting if the current element is in the createPanelElements
+    unless currentElement in project.createPanelElements
+      alert("Please select a symbol from the left panel to export")
+      return
+    
+    symbolData = @serializer.jsonify(currentElement)
+    symbolData.type = "ApparatusSymbol"
+    
+    jsonString = JSON.stringify(symbolData, null, 2)
+    fileName = (currentElement.label || "symbol") + ".json"
+    Storage.saveFile(jsonString, fileName, "application/json;charset=utf-8")
+
+  # Imports a symbol from a JSON file and adds it to the create panel
+  importSymbol: ->
+    Storage.loadFile (jsonString) =>
+      try
+        symbolData = JSON.parse(jsonString)
+        if symbolData.type != "ApparatusSymbol"
+          throw new Error("Not a valid Apparatus symbol file")
+        
+        # Deserialize the symbol
+        symbol = @serializer.dejsonify(symbolData)
+        
+        # Add to create panel
+        @project.createPanelElements.push(symbol)
+        
+        # Select the new symbol
+        @project.setEditing(symbol)
+        
+        @checkpoint()
+        Apparatus.refresh()
+      catch error
+        console.error("Error importing symbol:", error)
+        alert("Error importing symbol: " + error.message)
+
+  # ===========================================================================
   # Export
   # ===========================================================================
 
