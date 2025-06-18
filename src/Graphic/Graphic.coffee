@@ -107,9 +107,10 @@ class Graphic.Group extends Graphic.Element
       return null
 
   toSvg: (opts) ->
-    svgString = ""
+    svgString = "<g>"
     for childGraphic in @childGraphics
       svgString += childGraphic.toSvg(opts)
+    svgString += "</g>"
     return svgString
 
 

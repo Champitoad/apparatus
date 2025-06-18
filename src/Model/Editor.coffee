@@ -207,6 +207,61 @@ module.exports = class Editor
     fileName = (currentElement.label || "symbol") + ".json"
     Storage.saveFile(jsonString, fileName, "application/json;charset=utf-8")
 
+  # Exports the current symbol as an SVG file
+  exportCurrentSymbolAsSvg: ->
+    {project} = this
+    currentElement = project.editingElement
+    
+    # Only allow exporting if the current element is in the createPanelElements
+    unless currentElement in project.createPanelElements
+      alert("Please select a symbol from the left panel to export")
+      return
+
+    try
+      # Default DPI
+      dpi = 100
+      
+      # Get root SVG content with default bounds
+      viewMatrix = new Util.Matrix(1, 0, 0, -1, 0, 0)  # Just flip Y axis for measurement
+      svgContent = currentElement.allGraphics()[0].toSvg({viewMatrix})
+      
+      # Create temporary SVG to measure bounds
+      tempSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg")
+      tempSvg.innerHTML = svgContent
+      document.body.appendChild(tempSvg)
+      
+      group = tempSvg.querySelector('g')
+      bbox = group.getBoundingClientRect()
+      document.body.removeChild(tempSvg)
+      
+      # Add 5px padding (before DPI scaling)
+      padding = 5
+      
+      # Create final SVG with proper viewBox
+      viewMatrix = new Util.Matrix(dpi, 0, 0, -dpi, 0, 0)
+      
+      # Calculate dimensions with padding
+      width = bbox.width * dpi + 2 * padding
+      height = bbox.height * dpi + 2 * padding
+      
+      # Adjust viewBox to account for padding
+      viewBoxX = bbox.x * dpi - padding
+      viewBoxY = bbox.y * dpi - padding
+      
+      finalSvgContent = currentElement.allGraphics()[0].toSvg({viewMatrix})
+      svgString = """
+        <svg xmlns="http://www.w3.org/2000/svg" 
+             viewBox="#{viewBoxX} #{viewBoxY} #{width} #{height}"
+             width="#{width}"
+             height="#{height}">
+          #{finalSvgContent}
+        </svg>
+      """
+      
+      # Save the file
+      fileName = (currentElement.label || "symbol") + ".svg"
+      Storage.saveFile(svgString, fileName, "image/svg+xml;charset=utf-8")
+
   # Imports a symbol from a JSON file and adds it to the create panel
   importSymbol: ->
     Storage.loadFile (jsonString) =>
@@ -229,35 +284,6 @@ module.exports = class Editor
       catch error
         console.error("Error importing symbol:", error)
         alert("Error importing symbol: " + error.message)
-
-  # ===========================================================================
-  # Export
-  # ===========================================================================
-
-  exportSvg: (opts) ->
-    svgString = @exportSvgString(opts)
-    fileName = @project.editingElement.label + ".svg"
-    Storage.saveFile(svgString, fileName, "image/svg+xml;charset=utf-8")
-
-  exportSvgString: (opts={}) ->
-    dpi = opts.dpi ? 100
-    xMin = opts.xMin ? -6
-    xMax = opts.xMax ? 6
-    yMin = opts.yMin ? -6
-    yMax = opts.yMax ? 6
-
-    # Note we flip vertically so the SVG has the same orientation as what's
-    # shown in the Apparatus canvas.
-    viewMatrix = new Util.Matrix(dpi, 0, 0, -dpi, -xMin*dpi, yMax*dpi)
-    width = (xMax-xMin) * dpi
-    height = (yMax-yMin) * dpi
-
-    graphics = @project.editingElement.allGraphics()
-    svgString = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"#{width}\" height=\"#{height}\">"
-    for graphic in graphics
-      svgString += graphic.toSvg({viewMatrix})
-    svgString += "</svg>"
-    return svgString
 
 
   # ===========================================================================

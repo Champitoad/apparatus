@@ -32,15 +32,19 @@ R.create "Menubar",
 
       R.div {className: "MenubarSeparator"}
 
+      # R.MenubarItem {title: "Duplicate", isDisabled: !isSelection, fn: @_duplicateSelectedElement}
       R.MenubarItem {title: "Delete", isDisabled: !isSelection, fn: @_removeSelectedElement}
       R.MenubarItem {title: "Group", isDisabled: !isSelection, fn: @_groupSelectedElement}
-      # R.MenubarItem {title: "Duplicate", isDisabled: !isSelection, fn: @_duplicateSelectedElement}
-      R.MenubarItem {title: "Create Symbol", isDisabled: !isSelection, fn: @_createSymbolFromSelectedElement}
 
       R.div {className: "MenubarSeparator"}
       
+      R.MenubarItem {title: "Create Symbol", isDisabled: !isSelection, fn: @_createSymbolFromSelectedElement}
       R.MenubarItem {title: "Export Symbol", isDisabled: false, fn: @_exportCurrentSymbol}
       R.MenubarItem {title: "Import Symbol", isDisabled: false, fn: @_importSymbol}
+
+      R.div {className: "MenubarSeparator"}
+
+      R.MenubarItem {title: "Export SVG", isDisabled: false, fn: @_exportCurrentSymbolAsSvg}
 
       if editor.experimental
         [
@@ -127,6 +131,10 @@ R.create "Menubar",
   _exportCurrentSymbol: ->
     {editor} = @context
     editor.exportCurrentSymbol()
+
+  _exportCurrentSymbolAsSvg: ->
+    {editor} = @context
+    editor.exportCurrentSymbolAsSvg()
 
   _importSymbol: ->
     {editor} = @context
