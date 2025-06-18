@@ -32,7 +32,7 @@ R.create "Menubar",
 
       R.div {className: "MenubarSeparator"}
 
-      # R.MenubarItem {title: "Duplicate", isDisabled: !isSelection, fn: @_duplicateSelectedElement}
+      R.MenubarItem {title: "Duplicate", isDisabled: !isSelection, fn: @_duplicateSelectedElement}
       R.MenubarItem {title: "Delete", isDisabled: !isSelection, fn: @_removeSelectedElement}
       R.MenubarItem {title: "Group", isDisabled: !isSelection, fn: @_groupSelectedElement}
 
