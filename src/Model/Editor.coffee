@@ -123,9 +123,17 @@ module.exports = class Editor
   localStorageName: "apparatus"
 
   saveToLocalStorage: ->
-    jsonString = @getJsonStringOfProject()
-    window.localStorage[@localStorageName] = jsonString
-    return jsonString
+    try
+      jsonString = @getJsonStringOfProject()
+      # Only save if the string isn't too large (leave some room for other data)
+      if jsonString.length < 2 * 1024 * 1024  # 2MB limit
+        window.localStorage[@localStorageName] = jsonString
+      else
+        console.warn("Project too large to save to localStorage")
+      return jsonString
+    catch error
+      console.warn("Error saving to localStorage:", error)
+      return null
 
   loadFromLocalStorage: ->
     jsonString = window.localStorage[@localStorageName]
@@ -296,18 +304,26 @@ module.exports = class Editor
     @current = @getJsonStringOfProject()
     @undoStack = []
     @redoStack = []
-    @maxUndoStackSize = 100
+    # Start with a smaller stack size to prevent localStorage issues
+    @maxUndoStackSize = 20
 
   checkpoint: ->
     return if not @undoStack  # revision history hasn't been set up yet
 
-    jsonString = @saveToLocalStorage()
-    return if @current == jsonString
-    @undoStack.push(@current)
-    if @undoStack.length > @maxUndoStackSize
-      @undoStack.shift()
-    @redoStack = []
-    @current = jsonString
+    try
+      jsonString = @saveToLocalStorage()
+      return if !jsonString || @current == jsonString
+      
+      @undoStack.push(@current)
+      # Reduce max stack size to prevent localStorage overflow
+      @maxUndoStackSize = 20
+      while @undoStack.length > @maxUndoStackSize
+        @undoStack.shift()
+      @redoStack = []
+      @current = jsonString
+    catch error
+      console.warn("Could not create checkpoint:", error)
+      # Continue without checkpointing rather than crashing
 
   undo: ->
     return unless @isUndoable()
