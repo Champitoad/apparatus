@@ -263,6 +263,7 @@ Model.TextComponent = Model.Component.createVariant
 Model.TextComponent.addChildren [
   createAttribute("Text", "text", '"Text"')
   createAttribute("Font", "fontFamily", '"Lucida Grande"')
+  createAttribute("Font Style", "fontStyle", '"normal"')
   createAttribute("Color", "color", "rgba(0.20, 0.20, 0.20, 1.00)")
   createAttribute("Align", "textAlign", '"start"')
   createAttribute("Baseline", "textBaseline", '"alphabetic"')

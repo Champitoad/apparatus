@@ -266,7 +266,7 @@ class Graphic.Text extends Graphic.Path
       @highlightIfNecessary(opts)
 
   toSvg: ({viewMatrix}) ->
-    {text, fontFamily, textAlign, textBaseline, color} = @textComponent()
+    {text, fontFamily, fontStyle, textAlign, textBaseline, color} = @textComponent()
     matrix = viewMatrix.compose(@matrix)
     matrix = matrix.scale(1 / @textMultiplier, -1 / @textMultiplier)
     text = Util.escapeHtml(text)
@@ -280,7 +280,7 @@ class Graphic.Text extends Graphic.Path
       textBaseline = "text-before-edge"
     else if textBaseline == "bottom"
       textBaseline = "text-after-edge"
-    return "<text font-size=\"#{@textMultiplier}\" font-family=\"#{fontFamily}\" " +
+    return "<text font-size=\"#{@textMultiplier}\" font-family=\"#{fontFamily}\" font-style=\"#{fontStyle}\" " +
            "text-anchor=\"#{textAlign}\" dominant-baseline=\"#{textBaseline}\" " +
            "fill=\"#{color}\" transform=\"#{matrix.toSvg()}\">#{text}</text>"
 
@@ -296,11 +296,11 @@ class Graphic.Text extends Graphic.Path
   # setupText will set the appropriate font styles, color, and transformation
   # matrix so that text is ready to be rendered (fillText) at 0,0.
   setupText: ({ctx, viewMatrix}) ->
-    {text, fontFamily, textAlign, textBaseline, color} = @textComponent()
+    {text, fontFamily, fontStyle, textAlign, textBaseline, color} = @textComponent()
     matrix = viewMatrix.compose(@matrix)
     matrix = matrix.scale(1 / @textMultiplier, -1 / @textMultiplier)
     matrix.canvasTransform(ctx)
-    ctx.font = "#{@textMultiplier}px #{fontFamily}"
+    ctx.font = "#{fontStyle} #{@textMultiplier}px #{fontFamily}"
     ctx.textAlign = textAlign
     ctx.textBaseline = textBaseline
     ctx.fillStyle = color
@@ -312,7 +312,7 @@ class Graphic.Text extends Graphic.Path
     ctx.save()
     @setupText(opts)
 
-    {text, fontFamily, textAlign, textBaseline, color} = @textComponent()
+    {text, fontFamily, fontStyle, textAlign, textBaseline, color} = @textComponent()
 
     width = ctx.measureText(text).width / @textMultiplier
     height = 1
